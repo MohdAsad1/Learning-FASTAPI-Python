@@ -1,0 +1,200 @@
+# Learning FAST API
+
+1 - FastAPI is a fast, modern Python framework for building APIs.
+2 -  It's easy to learn and perfect for both beginners and professionals.
+3 - FastAPI auto-generates interactive docs.
+4 - Python type hints make your code safer and cleaner.
+5 - You can run your app using Uvicorn.
+FastAPI is a modern, high‑performance Python framework for building APIs quickly and correctly.
+
+-------------------------------------------------------------------------------------
+# Creating Venv and Activating the venv 
+
+python -m venv venv
+source venv/bin/activate
+pip install django
+
+----------------------------------------------------------------------------------------
+✅ Key Features
+
+⚡ Very fast (built on Starlette + Pydantic)
+🧠 Automatic data validation & type hints
+📄 Auto‑generated API docs (Swagger & ReDoc)
+🧩 Easy to learn and write clean code
+🔐 Easy authentication & dependency injection
+Async support (async/await)
+
+----------------------------------------------------------------------------
+✅ When Should You Use FastAPI?
+Use FastAPI when you want:
+
+REST APIs & microservices
+High‑performance backend
+Clean request validation
+Fast setup (less boilerplate than Django)
+
+===============================================================================================
+🟢 Step 1: Create Virtual Environment
+python -m venv venvsource venv/bin/activate      
+
+🟢 Step 2: Install FastAPI & Server
+FastAPI needs an ASGI server like Uvicorn:
+pip install fastapi uvicornShow more lines
+
+🟢 Step 3: Create Your First FastAPI App
+Create a file named main.py
+
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")def read_root():    
+return {"message": "Hello FastAPI"}
+
+🟢 Step 4: Run the Server
+uvicorn main:app --reload
+
+Open in browser:
+✅ API: http://127.0.0.1:8000
+✅ Swagger Docs: http://127.0.0.1:8000/docs
+✅ ReDoc: http://127.0.0.1:8000/redoc
+
+
+✅ FastAPI Project Structure (Basic)
+project/
+│── main.py
+│── venv/
+│── requirements.txt
+
+
+✅ Basic Concepts in FastAPI
+
+1️⃣ Path Operations (EndPoints)
+
+@app.get("/users")
+def get_users():    
+  return [{"id": 1, "name": "Asad"}]
+
+-------------------------------------------------------------------------------------------------
+WHAT IS ROUTING IN FASTAPI?
+HTTP methods:
+
+@app.get()
+@app.post()
+@app.put()
+@app.delete()
+@app.patch()
+
+----------------------------------------------------------------------------------------------------
+2️⃣ Path Parameters
+@app.get("/users/{user_id}")
+def get_user(user_id: int):
+  return {"user_id": user_id}
+
+✅ FastAPI validates user_id automatically!
+
+3️⃣ Query Parameters
+@app.get("/items/")
+def read_item(skip: int = 0, limit: int = 10):
+  return {"skip": skip, "limit": limit}
+
+URL:
+/items/?skip=5&limit=20
+
+
+4️⃣ Request Body (Pydantic Models)
+FastAPI uses Pydantic models for validation.
+from pydantic import BaseModel
+class User(BaseModel):
+  name: str    
+  age: int
+  email: str
+@app.post("/users/")
+def create_user(user: User):
+return user
+
+
+✅ Auto validation
+✅ Auto documentation
+✅ Type safety
+
+5️⃣ Response Model
+class UserResponse(BaseModel):
+  name: str
+  email: str
+@app.post("/users/", response_model=UserResponse)
+  def create_user(user: User):
+  return userShow more lines
+
+Only allowed fields are returned.
+
+6️⃣ Status Codes
+from fastapi import status
+@app.post("/login", status_code=status.HTTP_201_CREATED)
+  def login():
+  return {"message": "Logged in"}
+
+7️⃣ Async Routes (Important)
+@app.get("/async")
+async def async_route():
+  return {"msg": "Async works"}
+
+✅ Use async when doing:
+
+DB calls
+HTTP requests
+IO operations
+
+
+8️⃣ Error Handling
+from fastapi import HTTPException
+@app.get("/items/{id}")
+def read_item(id: int):
+  if id == 0:
+    raise HTTPException(status_code=404, detail="Item not found")    
+  return {"id": id}
+
+
+✅ Routers (Like Django Apps)
+Create routers/users.py
+
+from fastapi import APIRouterrouter = APIRouter(prefix="/users", tags=["Users"])
+@router.get("/")def list_users():
+  return []
+
+Register Router in main.py
+from fastapi import FastAPI
+from routers import users
+app = FastAPI()
+app
+
+✅ Dependency Injection (Powerful Feature)
+from fastapi import Depends
+def common_params(q: str = None):
+  return q
+
+@app.get("/items/")
+def read_items(q=Depends(common_params)):
+  return {"q": q}
+
+✅ Authentication Basics (Very Simple Example)
+from fastapi import Header
+
+@app.get("/secure")
+def secure(token: str = Header(...)):
+  if token != "secret":
+    return {"error": "Invalid token"}
+  return {"success": True}
+
+✅ FastAPI vs Django REST Framework (Quick Comparison)
+
+Feature - Fast API - DRF
+
+Speed -⚡Very Fast - Slower
+Docs - Auto - Manual
+Validation - Built‑in - Serializer based
+Async - Native - Limited
+Admin Panel - NO - Yes
+------------------------------------------------------------------------------
+
+
