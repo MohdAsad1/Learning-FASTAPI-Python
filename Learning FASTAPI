@@ -196,6 +196,143 @@ Validation - Built‑in - Serializer based
 Async - Native - Limited
 Admin Panel - NO - Yes
 ------------------------------------------------------------------------------
+Why Pydantic is used in FastAPI
+FastAPI uses Pydantic to:
 
+✅ Validate request data (JSON body, query params, path params)
+✅ Convert data types automatically
+✅ Define request & response schemas
+✅ Generate OpenAPI / Swagger docs automatically
+✅ Catch errors early with clear messages
 
+Pydantic ensures that the data coming into your FastAPI app is valid, well‑typed, and structured.
 
+from pydantic import BaseModel
+
+class User(BaseModel):
+    name: str
+    age: int
+    email: str
+-----------------------------------------------
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.post("/users/")
+def create_user(user: User):
+    return user
+----------------------------------------------
+{
+  "name": "Asad",
+  "age": "25",
+  "email": "asad@example.com"
+}
+
+------------------------------------------------------
+Single Pydantic Model Showing All Features of pydentic
+
+from __future__ import annotations
+
+from typing import Optional, List, Dict, Any, Literal
+from datetime import datetime
+from pydantic import (
+    BaseModel,
+    Field,
+    EmailStr,
+    HttpUrl,
+    ConfigDict,
+    field_validator,
+    model_validator,
+    computed_field,
+)
+
+class UserAllFeatures(BaseModel):
+    # =========================
+    # FEATURE 1: Model Config (ORM support + extra field control)
+    # - from_attributes=True  -> ORM support (like SQLAlchemy objects)
+    # - extra="forbid"        -> reject unknown fields (strict API contract)
+    # =========================
+    model_config = ConfigDict(from_attributes=True, extra="forbid")
+
+    # =========================
+    # FEATURE 2: Type hints (core schema definition)
+    # =========================
+    id: int
+
+    # =========================
+    # FEATURE 3: Field constraints + metadata (min/max length, examples, description)
+    # =========================
+    username: str = Field(
+        ...,
+        min_length=3,
+        max_length=20,
+        description="Public username (3–20 chars)",
+        examples=["asad_dev"]
+    )
+
+    # =========================
+    # FEATURE 4: Built-in validators via special types
+    # - EmailStr validates email format
+    # - HttpUrl validates URL format
+    # =========================
+    email: EmailStr
+    website: Optional[HttpUrl] = None
+
+    # =========================
+    # FEATURE 5: Optional fields + default values
+    # =========================
+    is_active: bool = True
+    bio: Optional[str] = Field(default=None, max_length=150)
+
+    # =========================
+    # FEATURE 6: Numeric constraints (gt/lt etc.)
+    # =========================
+    age: int = Field(..., gt=0, lt=120)
+
+    # =========================
+    # FEATURE 7: Literal / Enum-like constraints (allowed fixed values)
+    # =========================
+    role: Literal["admin", "user", "viewer"] = "user"
+
+    # =========================
+    # FEATURE 8: List / nested structures (complex JSON)
+    # =========================
+    tags: List[str] = Field(default_factory=list)
+    preferences: Dict[str, Any] = Field(default_factory=dict)
+
+    # =========================
+    # FEATURE 9: Auto timestamps using default_factory
+    # =========================
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+    # =========================
+    # FEATURE 10: Custom field validator (single-field validation)
+    # =========================
+    @field_validator("username")
+    @classmethod
+    def username_must_be_alnum_underscore(cls, v: str) -> str:
+        # allow letters, digits, underscore only
+        import re
+        if not re.fullmatch(r"[A-Za-z0-9_]+", v):
+            raise ValueError("username must contain only letters, digits, and underscore")
+        return v
+
+    # =========================
+    # FEATURE 11: Model-level validator (cross-field validation)
+    # - validates multiple fields together
+    # =========================
+    @model_validator(mode="after")
+    def validate_admin_age(self) -> "UserAllFeatures":
+        if self.role == "admin" and self.age < 18:
+            raise ValueError("admin must be at least 18 years old")
+        return self
+
+    # =========================
+    # FEATURE 12: Computed field (derived field in output)
+    # - appears in serialization output
+    # =========================
+    @computed_field
+    @property
+    def display_name(self) -> str:
+        # Example derived field used in responses
+        return f"{self.username} ({self.role})"
