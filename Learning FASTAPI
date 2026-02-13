@@ -429,3 +429,44 @@ def delete_book(book_id:int):
 
 =========================================================================================================================
 #  SQL Alchemy ORM -
+
+=========================================================================================================================
+WHAT IS AUTHENTICATION VS AUTHORIZATION?
+
+Authentication:
+This is the process of verifying who a user is — usually through a login system (like email + password). Only authenticated users should access certain parts of your API.
+
+Authorization:
+After authentication, authorization determines what the authenticated user is allowed to do — e.g., regular user vs admin.
+
+• Simple Example:
+Authentication = User proves  they user123
+Authorization = user123 can view their own data but not delete another user's data
+------------------------------------------------------------------------------------------------------------------------------
+# JWT in FastAPI?
+JWT is a signed token you issue after verifying a user’s credentials. 
+Clients send it on each request (usually in the Authorization: Bearer <token> header), and your API verifies it to authorize access.
+
+@ Common flow :-
+User logs in with username/password → you verify + issue JWT (short‑lived).
+Client stores token (e.g., in memory or secure storage).
+For each protected API call, client sends Authorization: Bearer <token>.
+Server verifies the token’s signature, expiry, and claims → allows/denies.
+
+-------------------------------------------------------------------------------------------------------------------------------
+OAUTH2 PASSWORD FLOW WORKS IN
+
+FastAPI uses OAuth2 with Password and Bearer tokens:
+1. The client sends username + password to a login endpoint
+2. Server checks credentials
+3. Server returns a JWT token
+4. Client sends the token in an Authorization: Bearer < token> header
+5. FastAPI checks token before allowing access to protected routes
+User Login --------> Server Creates JWT ----------> Client Stores Token -----------> Client Sends Token ---------> Server Validates Token --------> Access Granted
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+🔐 Passlib Argon2 — What It Is
+argon2 in Passlib is an implementation of the Argon2 password hashing algorithm, which is considered one of the strongest and most secure password hashing algorithms today.
+
+pip install passlib[argon2]
