@@ -430,6 +430,37 @@ def delete_book(book_id:int):
 =========================================================================================================================
 #  SQL Alchemy ORM -
 
+SQLAlchemy ORM in FastAPI is the combination of FastAPI (the web framework) with SQLAlchemy’s ORM (Object-Relational Mapper) to interact with relational databases using Python classes instead of writing raw SQL.
+In short:
+
+SQLAlchemy ORM lets you define models (Python classes) that map to DB tables, run queries, and manage transactions/sessions.
+FastAPI wires those models into your API endpoints, typically returning Pydantic models as responses.
+✅ Type-safe models: Define tables as Python classes.
+✅ Relationships: Express One-to-Many, Many-to-Many, etc.
+✅ Migrations: Works with Alembic for schema versioning.
+✅ Sync or Async: Choose traditional synchronous engine or async engine (asyncpg/aiosqlite) with FastAPI.
+
+from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy.orm import relationship
+from .database import Base
+
+# Models.py
+class Author(Base):
+    __tablename__ = "authors"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False, index=True)
+
+    books = relationship("Book", back_populates="author", cascade="all, delete-orphan")
+
+class Book(Base):
+    __tablename__ = "books"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(200), nullable=False, index=True)
+    publish_date = Column(Date, nullable=False)
+    author_id = Column(Integer, ForeignKey("authors.id", ondelete="CASCADE"), nullable=False)
+
+    author = relationship("Author", back_populates="books")
+
 =========================================================================================================================
 WHAT IS AUTHENTICATION VS AUTHORIZATION?
 
@@ -469,4 +500,11 @@ User Login --------> Server Creates JWT ----------> Client Stores Token --------
 🔐 Passlib Argon2 — What It Is
 argon2 in Passlib is an implementation of the Argon2 password hashing algorithm, which is considered one of the strongest and most secure password hashing algorithms today.
 
-pip install passlib[argon2]
+🔐 What is python-jose?
+python-jose is a Python library used for:
+
+Creating JWT tokens (signing)
+Verifying JWT tokens (decoding)
+Handling JOSE standards (JWT, JWS, JWE)
+
+It is commonly used in FastAPI for authentication.
